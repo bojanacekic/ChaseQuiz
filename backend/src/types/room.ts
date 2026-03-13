@@ -3,6 +3,7 @@ import type {
   CashBuilderState,
   OfferSelectionState,
   ChaseRoundState,
+  RoundResultState,
 } from './game.js'
 
 export interface Player {
@@ -23,6 +24,7 @@ export interface Room {
   cashBuilder: CashBuilderState | null
   offerSelection: OfferSelectionState | null
   chaseRound: ChaseRoundState | null
+  roundResult: RoundResultState | null
 }
 
 export type RoomState = Room

@@ -33,6 +33,29 @@ export interface OfferSelectionState {
   selectedOffer: number | null
 }
 
+export type CountdownStartedBy = 'player' | 'chaser' | null
+
+export interface ChaseDuelState {
+  questionId: string
+  playerAnswered: boolean
+  playerAnswer: number | null
+  playerAnsweredAt: number | null
+  playerWasCorrect: boolean | null
+  chaserKnowsAnswer: boolean
+  chaserWillAnswer: boolean
+  chaserAnswerDelayMs: number
+  chaserAnswered: boolean
+  chaserAnsweredAt: number | null
+  chaserWasCorrect: boolean | null
+  countdownStarted: boolean
+  countdownStartedBy: CountdownStartedBy
+  countdownEndsAt: number | null
+  countdownTimeLeft: number
+  resolved: boolean
+  playerMoved: boolean
+  chaserMoved: boolean
+}
+
 export interface ChaseRoundState {
   boardSize: number
   playerPosition: number
@@ -41,4 +64,12 @@ export interface ChaseRoundState {
   currentQuestion: Question | null
   askedQuestionIds: string[]
   shuffledQuestionIds: string[]
+  duelState: ChaseDuelState | null
+}
+
+export type RoundResultOutcome = 'caught' | 'escaped'
+
+export interface RoundResultState {
+  outcome: RoundResultOutcome
+  bankValue: number
 }

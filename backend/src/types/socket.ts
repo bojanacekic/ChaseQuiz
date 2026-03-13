@@ -12,6 +12,10 @@ export interface SubmitAnswerPayload {
   optionIndex: number
 }
 
+export interface SubmitChaseAnswerPayload {
+  optionIndex: number
+}
+
 export interface SelectOfferPayload {
   offerValue: number
 }

@@ -8,6 +8,13 @@ export function selectOffer(
   return chaseService.selectOffer(socketId, offerValue)
 }
 
+export function submitChaseAnswer(
+  socketId: string,
+  optionIndex: number
+): { success: true; room: Room } | { success: false; error: string } {
+  return chaseService.submitChaseAnswer(socketId, optionIndex)
+}
+
 export function submitAnswer(
   socketId: string,
   optionIndex: number

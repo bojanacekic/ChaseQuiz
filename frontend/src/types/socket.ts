@@ -8,6 +8,7 @@ export interface ClientToServerEvents {
   get_room_state: () => void
   start_game: () => void
   submit_answer: (payload: { optionIndex: number }) => void
+  submit_chase_answer: (payload: { optionIndex: number }) => void
   select_offer: (payload: { offerValue: number }) => void
 }
 
@@ -21,6 +22,7 @@ export interface ServerToClientEvents {
   join_room_error: (payload: { message: string }) => void
   start_game_error: (payload: { message: string }) => void
   submit_answer_error: (payload: { message: string }) => void
+  submit_chase_answer_error: (payload: { message: string }) => void
   select_offer_error: (payload: { message: string }) => void
   leave_room_error: (payload: { message: string }) => void
   get_room_state_error: (payload: { message: string }) => void

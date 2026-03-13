@@ -3,6 +3,7 @@ import type { CreateRoomPayload, JoinRoomPayload } from '../types/socket.js'
 import * as roomService from '../game/roomService.js'
 import * as roomStore from '../game/roomStore.js'
 import * as timerService from '../game/timerService.js'
+import * as chaseDuelTimer from '../game/chaseDuelTimer.js'
 
 export function registerRoomHandlers(io: Server): void {
   io.on('connection', (socket: Socket) => {
@@ -82,6 +83,7 @@ export function registerRoomHandlers(io: Server): void {
         socket.to(roomCode).emit('room_state', { room: roomState })
       } else {
         timerService.stopCashBuilderTimer(roomCode)
+        chaseDuelTimer.clearAll(roomCode)
       }
       socket.emit('left_room')
     })
@@ -119,6 +121,7 @@ export function registerRoomHandlers(io: Server): void {
           io.to(roomCode).emit('room_state', { room: roomState })
         } else {
           timerService.stopCashBuilderTimer(roomCode)
+          chaseDuelTimer.clearAll(roomCode)
         }
       }
       console.log('Client disconnected:', socket.id)

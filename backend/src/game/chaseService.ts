@@ -1,4 +1,5 @@
 import type { Room } from '../types/room.js'
+import type { Server } from 'socket.io'
 import * as roomStore from './roomStore.js'
 import {
   shuffleCashBuilderQuestionIds,
@@ -8,6 +9,8 @@ import {
   shuffleChaseRoundQuestionIds,
   getFirstChaseRoundQuestion,
 } from './questions.js'
+import * as chaseDuelLogic from './chaseDuelLogic.js'
+import * as chaseDuelTimer from './chaseDuelTimer.js'
 
 const BOARD_SIZE = 8 // positions 0 (chaser start) to 8 (home)
 const CHASER_START_POSITION = 0
@@ -209,9 +212,67 @@ export function selectOffer(
   }
 
   startChaseRound(room, offerValue, playerPosition)
-
   roomStore.setRoom(room)
   return { success: true, room }
+}
+
+export function submitChaseAnswer(
+  socketId: string,
+  optionIndex: number
+): { success: true; room: Room } | { success: false; error: string } {
+  const room = roomStore.getRoomBySocketId(socketId)
+
+  if (!room) {
+    return { success: false, error: 'You are not in a room' }
+  }
+
+  if (room.phase !== 'chase_round') {
+    return { success: false, error: 'Not in chase round' }
+  }
+
+  const chase = room.chaseRound
+  if (!chase?.currentQuestion || !chase.duelState) {
+    return { success: false, error: 'No active question' }
+  }
+
+  const player = room.players.find((p) => p.socketId === socketId)
+  if (!player || room.activePlayerId !== player.id) {
+    return { success: false, error: 'Only the active player can answer' }
+  }
+
+  if (chase.duelState.playerAnswered) {
+    return { success: false, error: 'Already answered' }
+  }
+
+  if (chase.duelState.resolved) {
+    return { success: false, error: 'Question already resolved' }
+  }
+
+  if (
+    chase.duelState.countdownEndsAt &&
+    Date.now() >= chase.duelState.countdownEndsAt
+  ) {
+    return { success: false, error: 'Too late' }
+  }
+
+  if (optionIndex < 0 || optionIndex >= chase.currentQuestion.options.length) {
+    return { success: false, error: 'Invalid answer' }
+  }
+
+  const updated = chaseDuelLogic.recordPlayerAnswer(room.code, optionIndex, player.id)
+  if (!updated) {
+    return { success: false, error: 'Could not record answer' }
+  }
+
+  roomStore.setRoom(updated)
+  return { success: true, room: updated }
+}
+
+export function maybeScheduleChaserAnswer(room: Room, io: Server): void {
+  const duel = room.chaseRound?.duelState
+  if (duel?.chaserWillAnswer) {
+    chaseDuelTimer.scheduleChaserAnswer(room.code, duel.chaserAnswerDelayMs, io)
+  }
 }
 
 function startChaseRound(room: Room, bankValue: number, playerPosition: number): void {
@@ -219,6 +280,7 @@ function startChaseRound(room: Room, bankValue: number, playerPosition: number):
   const firstQuestion = getFirstChaseRoundQuestion(shuffledQuestionIds)
 
   room.phase = 'chase_round'
+  room.roundResult = null
   room.chaseRound = {
     boardSize: BOARD_SIZE,
     playerPosition,
@@ -227,5 +289,8 @@ function startChaseRound(room: Room, bankValue: number, playerPosition: number):
     currentQuestion: firstQuestion,
     askedQuestionIds: [],
     shuffledQuestionIds,
+    duelState: null,
   }
+
+  chaseDuelLogic.initDuelForQuestion(room)
 }

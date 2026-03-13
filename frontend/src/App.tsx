@@ -20,9 +20,9 @@ function renderRoomView(room: RoomState, error: string | null, onClearError: () 
     case 'offer_selection':
       return <OfferSelectionScreen room={room} error={error} onClearError={onClearError} />
     case 'chase_round':
-      return <ChaseRoundScreen room={room} />
+      return <ChaseRoundScreen room={room} error={error} onClearError={onClearError} />
     case 'round_result':
-      return <RoundResultScreen />
+      return <RoundResultScreen room={room} />
     case 'finished':
       return <FinishedScreen />
     default:
@@ -71,6 +71,10 @@ function App() {
       setError(payload.message)
     }
 
+    const handleSubmitChaseAnswerError = (payload: { message: string }) => {
+      setError(payload.message)
+    }
+
     socket.on('room_created', handleRoomCreated)
     socket.on('room_joined', handleRoomJoined)
     socket.on('room_state', (payload) => {
@@ -82,6 +86,7 @@ function App() {
     socket.on('start_game_error', handleStartGameError)
     socket.on('submit_answer_error', handleSubmitAnswerError)
     socket.on('select_offer_error', handleSelectOfferError)
+    socket.on('submit_chase_answer_error', handleSubmitChaseAnswerError)
 
     return () => {
       socket.off('room_created', handleRoomCreated)
@@ -93,6 +98,7 @@ function App() {
       socket.off('start_game_error', handleStartGameError)
       socket.off('submit_answer_error', handleSubmitAnswerError)
       socket.off('select_offer_error', handleSelectOfferError)
+      socket.off('submit_chase_answer_error', handleSubmitChaseAnswerError)
     }
   }, [room?.code])
 

@@ -26,10 +26,11 @@ export function createRoom(nickname: string, socketId: string): Room {
     phase: 'lobby',
     createdAt: new Date(),
     activePlayerId: null,
-    cashBuilder: null,
-    offerSelection: null,
-    chaseRound: null,
-  }
+  cashBuilder: null,
+  offerSelection: null,
+  chaseRound: null,
+  roundResult: null,
+}
 
   roomStore.setRoom(room)
   return room
@@ -123,8 +124,11 @@ export function serializeRoom(room: Room): RoomState {
         currentQuestion: room.chaseRound.currentQuestion
           ? { ...room.chaseRound.currentQuestion }
           : null,
+        duelState: room.chaseRound.duelState ? { ...room.chaseRound.duelState } : null,
       }
     : null
+
+  const roundResult = room.roundResult ? { ...room.roundResult } : null
 
   return {
     ...room,
@@ -132,6 +136,7 @@ export function serializeRoom(room: Room): RoomState {
     cashBuilder,
     offerSelection,
     chaseRound,
+    roundResult,
   }
 }
 
