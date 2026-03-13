@@ -7,21 +7,26 @@ import {
   getEarnedAmount,
 } from './questions.js'
 
+const CASH_BUILDER_DURATION_MS = 60 * 1000
+
 /**
  * Cash builder flow:
- * - Questions are served from a shuffled queue (one shuffle per game start)
- * - Each answer triggers the next question immediately
- * - Round ends when: (1) timer expires (future) or (2) questions run out (fallback)
- * - No duplicates within a round - we use askedQuestionIds to track and advance
+ * - 60-second timer controlled by timerService
+ * - Questions served from shuffled queue until timer expires
+ * - Reject answers when timeLeft <= 0 (use endsAt to avoid race conditions)
  */
 export function startCashBuilder(room: Room): Room {
   const activePlayer = room.players[0]
   const shuffledQuestionIds = shuffleCashBuilderQuestionIds()
   const firstQuestion = getFirstCashBuilderQuestion(shuffledQuestionIds)
+  const now = Date.now()
+  const endsAt = now + CASH_BUILDER_DURATION_MS
 
   room.phase = 'cash_builder'
   room.activePlayerId = activePlayer.id
   room.cashBuilder = {
+    startedAt: now,
+    endsAt,
     timeLeft: 60,
     correctAnswers: 0,
     earnedAmount: 0,
@@ -33,6 +38,10 @@ export function startCashBuilder(room: Room): Room {
   room.chaseRound = null
 
   return room
+}
+
+function isTimeExpired(endsAt: number): boolean {
+  return Date.now() >= endsAt
 }
 
 export function submitCashBuilderAnswer(
@@ -49,6 +58,15 @@ export function submitCashBuilderAnswer(
     return { success: false, error: 'Not in cash builder phase' }
   }
 
+  const cb = room.cashBuilder
+  if (!cb) {
+    return { success: false, error: 'No cash builder state' }
+  }
+
+  if (isTimeExpired(cb.endsAt)) {
+    return { success: false, error: 'Time is up' }
+  }
+
   const player = room.players.find((p) => p.socketId === socketId)
   if (!player) {
     return { success: false, error: 'Player not found in room' }
@@ -58,8 +76,7 @@ export function submitCashBuilderAnswer(
     return { success: false, error: 'Only the active player can answer' }
   }
 
-  const cb = room.cashBuilder
-  if (!cb?.currentQuestion) {
+  if (!cb.currentQuestion) {
     return { success: false, error: 'No question active' }
   }
 
@@ -75,21 +92,18 @@ export function submitCashBuilderAnswer(
     cb.earnedAmount = getEarnedAmount(cb.correctAnswers)
   }
 
-  // Serve next question from shuffled queue
   const nextQuestion = getNextCashBuilderQuestion(
     cb.shuffledQuestionIds,
     cb.askedQuestionIds
   )
-
-  if (nextQuestion === null) {
-    // Fallback: ran out of questions - transition to offer selection
-    transitionToOfferSelection(room)
-  } else {
-    cb.currentQuestion = nextQuestion
-  }
+  cb.currentQuestion = nextQuestion
 
   roomStore.setRoom(room)
   return { success: true, room }
+}
+
+export function endCashBuilder(room: Room): void {
+  transitionToOfferSelection(room)
 }
 
 function transitionToOfferSelection(room: Room): void {
@@ -100,11 +114,12 @@ function transitionToOfferSelection(room: Room): void {
   room.cashBuilder = {
     ...cb,
     currentQuestion: null,
+    timeLeft: 0,
   }
   room.offerSelection = {
-    lowerOffer: Math.floor(earned * 0.25),
-    middleOffer: Math.floor(earned * 0.5),
-    higherOffer: Math.floor(earned * 1),
+    lowerOffer: Math.max(earned - 2, 0),
+    middleOffer: earned,
+    higherOffer: earned + 2,
     selectedOffer: null,
   }
 }

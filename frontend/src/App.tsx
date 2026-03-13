@@ -18,7 +18,7 @@ function renderRoomView(room: RoomState, error: string | null, onClearError: () 
     case 'cash_builder':
       return <CashBuilderScreen room={room} error={error} onClearError={onClearError} />
     case 'offer_selection':
-      return <OfferSelectionScreen />
+      return <OfferSelectionScreen room={room} />
     case 'chase_round':
       return <ChaseRoundScreen />
     case 'round_result':

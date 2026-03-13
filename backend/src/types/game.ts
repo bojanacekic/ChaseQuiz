@@ -16,12 +16,14 @@ export type GamePhase =
   | 'finished'
 
 export interface CashBuilderState {
-  timeLeft: number
+  startedAt: number   // Unix timestamp (ms)
+  endsAt: number     // Unix timestamp (ms) - when round expires
+  timeLeft: number   // seconds remaining, updated by timer
   correctAnswers: number
   earnedAmount: number
   currentQuestion: Question | null
   askedQuestionIds: string[]
-  shuffledQuestionIds: string[] // order for this game session
+  shuffledQuestionIds: string[]
 }
 
 export interface OfferSelectionState {

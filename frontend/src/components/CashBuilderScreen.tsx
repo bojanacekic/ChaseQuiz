@@ -15,6 +15,7 @@ function CashBuilderScreen({ room, error, onClearError }: CashBuilderScreenProps
       )
     : false
   const question = cb?.currentQuestion
+  const canAnswer = isActivePlayer && cb && cb.timeLeft > 0
 
   const handleSubmitAnswer = (optionIndex: number) => {
     onClearError()
@@ -48,8 +49,26 @@ function CashBuilderScreen({ room, error, onClearError }: CashBuilderScreenProps
           </div>
         </div>
 
-        <div className="rounded-lg bg-slate-800/50 border border-slate-700 p-3">
-          <p className="text-sm text-slate-400">Time left: {cb.timeLeft}s (placeholder)</p>
+        <div
+          className={`rounded-lg border p-4 ${
+            cb.timeLeft > 10
+              ? 'bg-slate-800/50 border-slate-700'
+              : cb.timeLeft > 0
+                ? 'bg-amber-500/10 border-amber-500/50'
+                : 'bg-slate-800/50 border-slate-700'
+          }`}
+        >
+          <p className="text-sm text-slate-400">Time left</p>
+          <p
+            className={`text-2xl font-bold font-mono ${
+              cb.timeLeft > 10 ? 'text-white' : cb.timeLeft > 0 ? 'text-amber-400' : 'text-slate-500'
+            }`}
+          >
+            {cb.timeLeft}s
+          </p>
+          {cb.timeLeft <= 0 && (
+            <p className="text-sm text-slate-400 mt-1">Time&#39;s up!</p>
+          )}
         </div>
 
         {question ? (
@@ -61,7 +80,7 @@ function CashBuilderScreen({ room, error, onClearError }: CashBuilderScreenProps
               <p className="text-white text-lg">{question.text}</p>
             </div>
 
-            {isActivePlayer ? (
+            {canAnswer ? (
               <div className="space-y-3">
                 {error && <p className="text-red-400 text-sm">{error}</p>}
                 <div className="grid gap-3">
@@ -76,6 +95,8 @@ function CashBuilderScreen({ room, error, onClearError }: CashBuilderScreenProps
                   ))}
                 </div>
               </div>
+            ) : cb.timeLeft <= 0 ? (
+              <p className="text-amber-400 text-center font-medium">Round over – check your offers</p>
             ) : (
               <p className="text-slate-400 text-center">Waiting for player to answer...</p>
             )}

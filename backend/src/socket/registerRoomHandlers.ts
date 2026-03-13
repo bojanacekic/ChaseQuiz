@@ -2,6 +2,7 @@ import type { Server, Socket } from 'socket.io'
 import type { CreateRoomPayload, JoinRoomPayload } from '../types/socket.js'
 import * as roomService from '../game/roomService.js'
 import * as roomStore from '../game/roomStore.js'
+import * as timerService from '../game/timerService.js'
 
 export function registerRoomHandlers(io: Server): void {
   io.on('connection', (socket: Socket) => {
@@ -72,12 +73,15 @@ export function registerRoomHandlers(io: Server): void {
         return
       }
 
+      const roomCode = room.code
       const updatedRoom = roomService.leaveRoom(socket.id)
-      socket.leave(room.code)
+      socket.leave(roomCode)
 
       if (updatedRoom) {
         const roomState = roomService.serializeRoom(updatedRoom)
-        socket.to(room.code).emit('room_state', { room: roomState })
+        socket.to(roomCode).emit('room_state', { room: roomState })
+      } else {
+        timerService.stopCashBuilderTimer(roomCode)
       }
       socket.emit('left_room')
     })
@@ -102,15 +106,19 @@ export function registerRoomHandlers(io: Server): void {
 
       const roomState = roomService.serializeRoom(result.room)
       io.to(result.room.code).emit('room_state', { room: roomState })
+      timerService.startCashBuilderTimer(result.room.code, io)
     })
 
     socket.on('disconnect', () => {
       const room = roomStore.getRoomBySocketId(socket.id)
       if (room) {
+        const roomCode = room.code
         const updatedRoom = roomService.leaveRoom(socket.id)
         if (updatedRoom) {
           const roomState = roomService.serializeRoom(updatedRoom)
-          io.to(room.code).emit('room_state', { room: roomState })
+          io.to(roomCode).emit('room_state', { room: roomState })
+        } else {
+          timerService.stopCashBuilderTimer(roomCode)
         }
       }
       console.log('Client disconnected:', socket.id)

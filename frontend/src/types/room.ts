@@ -25,6 +25,8 @@ export type GamePhase =
   | 'finished'
 
 export interface CashBuilderState {
+  startedAt: number
+  endsAt: number
   timeLeft: number
   correctAnswers: number
   earnedAmount: number
