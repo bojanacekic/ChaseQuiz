@@ -1,3 +1,4 @@
+import ChaseBoard from './ChaseBoard'
 import type { RoomState } from '../types/room'
 
 interface ChaseRoundScreenProps {
@@ -21,47 +22,39 @@ function ChaseRoundScreen({ room }: ChaseRoundScreenProps) {
   const question = chase.currentQuestion
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col items-center p-6">
       <h1 className="text-4xl font-bold text-amber-400 mb-2">The Chase</h1>
-      <p className="text-slate-400 mb-8">Chase round started</p>
+      <p className="text-slate-400 mb-8">Chase round</p>
 
-      <div className="w-full max-w-lg space-y-6">
-        <div className="rounded-lg bg-slate-800 border border-slate-600 p-4 text-center">
-          <p className="text-sm text-slate-400 mb-1">Bank value</p>
+      <div className="flex flex-col items-center w-full max-w-lg space-y-8">
+        <ChaseBoard
+          boardSize={chase.boardSize}
+          playerPosition={chase.playerPosition}
+          chaserPosition={chase.chaserPosition}
+        />
+
+        <div className="w-full rounded-lg bg-slate-800 border border-slate-600 p-4 text-center">
+          <p className="text-sm text-slate-400 mb-1">Bank</p>
           <p className="text-2xl font-bold text-amber-400">
             {formatEuro(chase.bankValue)}
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-lg bg-slate-800 border border-slate-600 p-4">
-            <p className="text-sm text-slate-400">Board size</p>
-            <p className="text-xl font-bold text-white">{chase.boardSize}</p>
-          </div>
-          <div className="rounded-lg bg-slate-800 border border-slate-600 p-4">
-            <p className="text-sm text-slate-400">Your position</p>
-            <p className="text-xl font-bold text-green-400">{chase.playerPosition}</p>
-          </div>
-          <div className="rounded-lg bg-slate-800 border border-slate-600 p-4">
-            <p className="text-sm text-slate-400">Chaser position</p>
-            <p className="text-xl font-bold text-red-400">{chase.chaserPosition}</p>
-          </div>
-        </div>
-
         {question ? (
-          <div className="rounded-lg bg-slate-800 border border-slate-600 p-4">
+          <div className="w-full rounded-lg bg-slate-800 border border-slate-600 p-4">
             <p className="text-xs text-slate-500 mb-1">
               {question.category} • {question.difficulty}
             </p>
             <p className="text-white text-lg mb-4">{question.text}</p>
             <div className="grid gap-2">
               {question.options.map((option, index) => (
-                <div
+                <button
                   key={index}
-                  className="py-2 px-3 rounded bg-slate-700/50 text-slate-300"
+                  className="w-full py-3 px-4 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white text-left transition-colors"
+                  disabled
                 >
                   {option}
-                </div>
+                </button>
               ))}
             </div>
             <p className="text-slate-500 text-sm mt-3">Answer logic coming soon</p>

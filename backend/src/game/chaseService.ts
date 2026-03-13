@@ -9,7 +9,7 @@ import {
   getFirstChaseRoundQuestion,
 } from './questions.js'
 
-const BOARD_SIZE = 7
+const BOARD_SIZE = 8 // positions 0 (chaser start) to 8 (home)
 const CHASER_START_POSITION = 0
 
 const CASH_BUILDER_DURATION_MS = 60 * 1000
