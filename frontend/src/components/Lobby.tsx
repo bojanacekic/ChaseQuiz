@@ -60,7 +60,7 @@ function Lobby({ room, error, onClearError }: LobbyProps) {
         {isHost && (
           <button
             onClick={handleStartGame}
-            disabled={room.players.length < 2}
+            disabled={room.players.length < 1}
             className="w-full py-3 px-4 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:bg-slate-600 disabled:cursor-not-allowed text-slate-900 font-semibold transition-colors"
           >
             Start Game

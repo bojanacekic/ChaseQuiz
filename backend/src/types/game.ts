@@ -1,12 +1,3 @@
-export interface Player {
-  id: string
-  nickname: string
-  socketId: string
-  isHost: boolean
-  isConnected: boolean
-  score: number
-}
-
 export interface Question {
   id: string
   text: string
@@ -45,16 +36,3 @@ export interface ChaseRoundState {
   chaserPosition: number
   currentQuestion: Question | null
 }
-
-export interface Room {
-  code: string
-  players: Player[]
-  phase: GamePhase
-  createdAt: string
-  activePlayerId: string | null
-  cashBuilder: CashBuilderState | null
-  offerSelection: OfferSelectionState | null
-  chaseRound: ChaseRoundState | null
-}
-
-export type RoomState = Room

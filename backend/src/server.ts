@@ -3,6 +3,7 @@ import { createServer } from 'http'
 import { Server } from 'socket.io'
 import cors from 'cors'
 import { registerRoomHandlers } from './socket/registerRoomHandlers.js'
+import { registerGameHandlers } from './socket/registerGameHandlers.js'
 
 const app = express()
 const httpServer = createServer(app)
@@ -17,6 +18,7 @@ const io = new Server(httpServer, {
 })
 
 registerRoomHandlers(io)
+registerGameHandlers(io)
 
 const PORT = 5000
 

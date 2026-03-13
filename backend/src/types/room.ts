@@ -1,3 +1,10 @@
+import type {
+  GamePhase,
+  CashBuilderState,
+  OfferSelectionState,
+  ChaseRoundState,
+} from './game.js'
+
 export interface Player {
   id: string
   nickname: string
@@ -7,13 +14,15 @@ export interface Player {
   score: number
 }
 
-export type RoomStatus = 'lobby' | 'question_round' | 'finished'
-
 export interface Room {
   code: string
   players: Player[]
-  status: RoomStatus
+  phase: GamePhase
   createdAt: Date
+  activePlayerId: string | null
+  cashBuilder: CashBuilderState | null
+  offerSelection: OfferSelectionState | null
+  chaseRound: ChaseRoundState | null
 }
 
 export type RoomState = Room

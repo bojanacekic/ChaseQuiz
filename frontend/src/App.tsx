@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
 import HomePage from './pages/HomePage'
 import Lobby from './components/Lobby'
-import GameScreen from './components/GameScreen'
+import CashBuilderScreen from './components/CashBuilderScreen'
+import OfferSelectionScreen from './components/OfferSelectionScreen'
+import ChaseRoundScreen from './components/ChaseRoundScreen'
+import RoundResultScreen from './components/RoundResultScreen'
 import FinishedScreen from './components/FinishedScreen'
 import { socket } from './socket'
 import type { RoomState } from './types/room'
@@ -9,11 +12,17 @@ import type { RoomState } from './types/room'
 import './socket'
 
 function renderRoomView(room: RoomState, error: string | null, onClearError: () => void) {
-  switch (room.status) {
+  switch (room.phase) {
     case 'lobby':
       return <Lobby room={room} error={error} onClearError={onClearError} />
-    case 'question_round':
-      return <GameScreen room={room} />
+    case 'cash_builder':
+      return <CashBuilderScreen room={room} error={error} onClearError={onClearError} />
+    case 'offer_selection':
+      return <OfferSelectionScreen />
+    case 'chase_round':
+      return <ChaseRoundScreen />
+    case 'round_result':
+      return <RoundResultScreen />
     case 'finished':
       return <FinishedScreen />
     default:
@@ -54,6 +63,10 @@ function App() {
       setError(payload.message)
     }
 
+    const handleSubmitAnswerError = (payload: { message: string }) => {
+      setError(payload.message)
+    }
+
     socket.on('room_created', handleRoomCreated)
     socket.on('room_joined', handleRoomJoined)
     socket.on('room_state', (payload) => {
@@ -63,6 +76,7 @@ function App() {
     socket.on('create_room_error', handleCreateRoomError)
     socket.on('join_room_error', handleJoinRoomError)
     socket.on('start_game_error', handleStartGameError)
+    socket.on('submit_answer_error', handleSubmitAnswerError)
 
     return () => {
       socket.off('room_created', handleRoomCreated)
@@ -72,6 +86,7 @@ function App() {
       socket.off('create_room_error', handleCreateRoomError)
       socket.off('join_room_error', handleJoinRoomError)
       socket.off('start_game_error', handleStartGameError)
+      socket.off('submit_answer_error', handleSubmitAnswerError)
     }
   }, [room?.code])
 

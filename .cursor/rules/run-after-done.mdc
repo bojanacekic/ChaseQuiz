@@ -1,0 +1,24 @@
+---
+description: Run ChaseQuiz after completing implementation tasks
+alwaysApply: true
+---
+
+# Run Project After Done
+
+After completing implementation or feature work on ChaseQuiz, always run the project so the user can test it.
+
+## Commands
+
+Start both backend and frontend in the background:
+
+1. **Backend** (port 5000):
+   ```
+   cd c:\Users\User\Desktop\ChaseQuiz\backend; npm run dev
+   ```
+
+2. **Frontend** (port 5173):
+   ```
+   cd c:\Users\User\Desktop\ChaseQuiz\frontend; npm run dev
+   ```
+
+Run both as background tasks. Tell the user when they're ready and provide the URL: http://localhost:5173

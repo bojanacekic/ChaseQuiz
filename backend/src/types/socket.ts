@@ -8,6 +8,10 @@ export interface JoinRoomPayload {
   roomCode: string
 }
 
+export interface SubmitAnswerPayload {
+  optionIndex: number
+}
+
 // Server -> Client payloads
 export interface RoomCreatedPayload {
   room: import('./room.js').RoomState

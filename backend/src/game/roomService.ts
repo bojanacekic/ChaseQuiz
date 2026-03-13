@@ -1,6 +1,7 @@
 import type { Player, Room, RoomState } from '../types/room.js'
 import { generateRoomCode } from '../utils/generateRoomCode.js'
 import * as roomStore from './roomStore.js'
+import * as chaseService from './chaseService.js'
 
 export function createRoom(nickname: string, socketId: string): Room {
   let code: string
@@ -22,8 +23,12 @@ export function createRoom(nickname: string, socketId: string): Room {
   const room: Room = {
     code,
     players: [player],
-    status: 'lobby',
+    phase: 'lobby',
     createdAt: new Date(),
+    activePlayerId: null,
+    cashBuilder: null,
+    offerSelection: null,
+    chaseRound: null,
   }
 
   roomStore.setRoom(room)
@@ -72,7 +77,6 @@ export function leaveRoom(socketId: string): Room | null {
     return null
   }
 
-  // If host left, promote first player to host
   const hostLeft = !room.players.some((p) => p.isHost)
   if (hostLeft && room.players.length > 0) {
     room.players[0].isHost = true
@@ -100,9 +104,34 @@ export function getRoomState(roomCode: string): RoomState | null {
 }
 
 export function serializeRoom(room: Room): RoomState {
+  const cashBuilder = room.cashBuilder
+    ? {
+        ...room.cashBuilder,
+        currentQuestion: room.cashBuilder.currentQuestion
+          ? { ...room.cashBuilder.currentQuestion }
+          : null,
+      }
+    : null
+
+  const offerSelection = room.offerSelection
+    ? { ...room.offerSelection }
+    : null
+
+  const chaseRound = room.chaseRound
+    ? {
+        ...room.chaseRound,
+        currentQuestion: room.chaseRound.currentQuestion
+          ? { ...room.chaseRound.currentQuestion }
+          : null,
+      }
+    : null
+
   return {
     ...room,
     players: room.players.map((p) => ({ ...p })),
+    cashBuilder,
+    offerSelection,
+    chaseRound,
   }
 }
 
@@ -113,7 +142,7 @@ export function startGame(socketId: string): { success: true; room: Room } | { s
     return { success: false, error: 'You are not in a room' }
   }
 
-  if (room.status !== 'lobby') {
+  if (room.phase !== 'lobby') {
     return { success: false, error: 'Game has already started' }
   }
 
@@ -122,11 +151,11 @@ export function startGame(socketId: string): { success: true; room: Room } | { s
     return { success: false, error: 'Only the host can start the game' }
   }
 
-  if (room.players.length < 2) {
-    return { success: false, error: 'Need at least 2 players to start' }
+  if (room.players.length < 1) {
+    return { success: false, error: 'Need at least 1 player to start' }
   }
 
-  room.status = 'question_round'
+  chaseService.startCashBuilder(room)
   roomStore.setRoom(room)
   return { success: true, room }
 }
