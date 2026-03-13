@@ -44,7 +44,7 @@ function CashBuilderScreen({ room, error, onClearError }: CashBuilderScreenProps
           <div className="rounded-lg bg-slate-800 border border-slate-600 p-4">
             <p className="text-sm text-slate-400">Earned</p>
             <p className="text-2xl font-bold text-amber-400">
-              £{cb.earnedAmount.toLocaleString()}
+              {cb.earnedAmount.toLocaleString()}€
             </p>
           </div>
         </div>

@@ -2,7 +2,7 @@ import type { Question } from '../types/game.js'
 import { CASH_BUILDER_QUESTIONS } from './cashBuilderQuestions.js'
 import { CHASE_ROUND_QUESTIONS } from './chaseQuestions.js'
 
-const CASH_PER_CORRECT = 1000
+const CASH_PER_CORRECT = 500
 
 /** Fisher-Yates shuffle - returns a new shuffled copy of the array */
 export function shuffleArray<T>(array: T[]): T[] {

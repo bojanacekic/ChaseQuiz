@@ -106,9 +106,28 @@ export function endCashBuilder(room: Room): void {
   transitionToOfferSelection(room)
 }
 
+const HIGHER_OFFER_ZERO_CORRECT_OPTIONS = [-1000, -500, 0]
+
+function computeOffers(correctAnswers: number, earnedAmount: number) {
+  const middleOffer = earnedAmount
+
+  let higherOffer: number
+  if (correctAnswers === 0) {
+    const idx = Math.floor(Math.random() * HIGHER_OFFER_ZERO_CORRECT_OPTIONS.length)
+    higherOffer = HIGHER_OFFER_ZERO_CORRECT_OPTIONS[idx]
+  } else {
+    higherOffer = correctAnswers * 500 * 3 + 2000
+  }
+
+  const lowerOffer = correctAnswers > 0 ? correctAnswers * 500 - 1500 : 0
+
+  return { lowerOffer, middleOffer, higherOffer }
+}
+
 function transitionToOfferSelection(room: Room): void {
   const cb = room.cashBuilder!
   const earned = cb.earnedAmount
+  const { lowerOffer, middleOffer, higherOffer } = computeOffers(cb.correctAnswers, earned)
 
   room.phase = 'offer_selection'
   room.cashBuilder = {
@@ -117,9 +136,9 @@ function transitionToOfferSelection(room: Room): void {
     timeLeft: 0,
   }
   room.offerSelection = {
-    lowerOffer: Math.max(earned - 2, 0),
-    middleOffer: earned,
-    higherOffer: earned + 2,
+    lowerOffer,
+    middleOffer,
+    higherOffer,
     selectedOffer: null,
   }
 }

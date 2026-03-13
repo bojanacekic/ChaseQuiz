@@ -16,6 +16,9 @@ function OfferSelectionScreen({ room }: OfferSelectionScreenProps) {
     )
   }
 
+  const formatEuro = (value: number) =>
+    value >= 0 ? `${value.toLocaleString()}€` : `-${Math.abs(value).toLocaleString()}€`
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6">
       <h1 className="text-4xl font-bold text-amber-400 mb-2">Offer Selection</h1>
@@ -25,27 +28,27 @@ function OfferSelectionScreen({ room }: OfferSelectionScreenProps) {
         <div className="rounded-lg bg-slate-800 border border-slate-600 p-4 text-center">
           <p className="text-sm text-slate-400 mb-1">You earned</p>
           <p className="text-2xl font-bold text-amber-400">
-            £{earned.toLocaleString()}
+            {formatEuro(earned)}
           </p>
         </div>
 
         <div className="space-y-3">
           <div className="rounded-lg bg-slate-800 border border-slate-600 p-4 flex justify-between items-center">
-            <span className="text-slate-400">Lower offer</span>
+            <span className="text-slate-400">Higher offer</span>
             <span className="text-xl font-bold text-white">
-              £{offer.lowerOffer.toLocaleString()}
+              {formatEuro(offer.higherOffer)}
             </span>
           </div>
           <div className="rounded-lg bg-amber-500/20 border border-amber-500/50 p-4 flex justify-between items-center">
             <span className="text-amber-400">Middle offer (bank)</span>
             <span className="text-xl font-bold text-amber-400">
-              £{offer.middleOffer.toLocaleString()}
+              {formatEuro(offer.middleOffer)}
             </span>
           </div>
           <div className="rounded-lg bg-slate-800 border border-slate-600 p-4 flex justify-between items-center">
-            <span className="text-slate-400">Higher offer</span>
+            <span className="text-slate-400">Lower offer</span>
             <span className="text-xl font-bold text-white">
-              £{offer.higherOffer.toLocaleString()}
+              {formatEuro(offer.lowerOffer)}
             </span>
           </div>
         </div>
