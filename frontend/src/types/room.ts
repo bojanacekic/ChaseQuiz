@@ -30,6 +30,7 @@ export interface CashBuilderState {
   earnedAmount: number
   currentQuestion: Question | null
   askedQuestionIds: string[]
+  shuffledQuestionIds: string[]
 }
 
 export interface OfferSelectionState {

@@ -21,6 +21,7 @@ export interface CashBuilderState {
   earnedAmount: number
   currentQuestion: Question | null
   askedQuestionIds: string[]
+  shuffledQuestionIds: string[] // order for this game session
 }
 
 export interface OfferSelectionState {

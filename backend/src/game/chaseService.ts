@@ -1,16 +1,23 @@
 import type { Room } from '../types/room.js'
-import type { CashBuilderState } from '../types/game.js'
 import * as roomStore from './roomStore.js'
 import {
-  getCashBuilderQuestion,
+  shuffleCashBuilderQuestionIds,
+  getFirstCashBuilderQuestion,
+  getNextCashBuilderQuestion,
   getEarnedAmount,
 } from './questions.js'
 
-const CASH_BUILDER_QUESTION_COUNT = 5
-
+/**
+ * Cash builder flow:
+ * - Questions are served from a shuffled queue (one shuffle per game start)
+ * - Each answer triggers the next question immediately
+ * - Round ends when: (1) timer expires (future) or (2) questions run out (fallback)
+ * - No duplicates within a round - we use askedQuestionIds to track and advance
+ */
 export function startCashBuilder(room: Room): Room {
   const activePlayer = room.players[0]
-  const firstQuestion = getCashBuilderQuestion([])
+  const shuffledQuestionIds = shuffleCashBuilderQuestionIds()
+  const firstQuestion = getFirstCashBuilderQuestion(shuffledQuestionIds)
 
   room.phase = 'cash_builder'
   room.activePlayerId = activePlayer.id
@@ -20,6 +27,7 @@ export function startCashBuilder(room: Room): Room {
     earnedAmount: 0,
     currentQuestion: firstQuestion,
     askedQuestionIds: [],
+    shuffledQuestionIds,
   }
   room.offerSelection = null
   room.chaseRound = null
@@ -67,10 +75,16 @@ export function submitCashBuilderAnswer(
     cb.earnedAmount = getEarnedAmount(cb.correctAnswers)
   }
 
-  if (cb.askedQuestionIds.length >= CASH_BUILDER_QUESTION_COUNT) {
+  // Serve next question from shuffled queue
+  const nextQuestion = getNextCashBuilderQuestion(
+    cb.shuffledQuestionIds,
+    cb.askedQuestionIds
+  )
+
+  if (nextQuestion === null) {
+    // Fallback: ran out of questions - transition to offer selection
     transitionToOfferSelection(room)
   } else {
-    const nextQuestion = getCashBuilderQuestion(cb.askedQuestionIds)
     cb.currentQuestion = nextQuestion
   }
 
