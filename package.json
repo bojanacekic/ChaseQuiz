@@ -1,0 +1,12 @@
+{
+  "name": "chase-quiz",
+  "version": "1.0.0",
+  "description": "Real-time multiplayer quiz game inspired by The Chase",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build"
+  }
+}
