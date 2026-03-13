@@ -2,6 +2,7 @@ import express from 'express'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import cors from 'cors'
+import { registerRoomHandlers } from './socket/registerRoomHandlers.js'
 
 const app = express()
 const httpServer = createServer(app)
@@ -15,9 +16,7 @@ const io = new Server(httpServer, {
   },
 })
 
-io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id)
-})
+registerRoomHandlers(io)
 
 const PORT = 5000
 

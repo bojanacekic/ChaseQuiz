@@ -1,22 +1,42 @@
 import { useState } from 'react'
+import { socket } from '../socket'
 
-function HomePage() {
+interface HomePageProps {
+  error: string | null
+  clearError: () => void
+}
+
+function HomePage({ error, clearError }: HomePageProps) {
   const [nickname, setNickname] = useState('')
   const [roomCode, setRoomCode] = useState('')
 
   const handleCreateRoom = () => {
-    // Placeholder - game logic to be added later
-    console.log('Create room:', nickname)
+    clearError()
+    const trimmed = nickname.trim()
+    if (!trimmed) return
+    socket.emit('create_room', { nickname: trimmed })
   }
 
   const handleJoinRoom = () => {
-    // Placeholder - game logic to be added later
-    console.log('Join room:', nickname, roomCode)
+    clearError()
+    const trimmedNick = nickname.trim()
+    const trimmedCode = roomCode.trim()
+    if (!trimmedNick || !trimmedCode) return
+    socket.emit('join_room', {
+      nickname: trimmedNick,
+      roomCode: trimmedCode.toUpperCase(),
+    })
   }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6">
       <h1 className="text-4xl font-bold text-amber-400 mb-12">ChaseQuiz</h1>
+
+      {error && (
+        <div className="w-full max-w-md mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-400 text-sm">
+          {error}
+        </div>
+      )}
 
       <div className="w-full max-w-md space-y-8">
         <div className="space-y-2">
