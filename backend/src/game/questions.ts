@@ -67,6 +67,35 @@ export function getFirstCashBuilderQuestion(
   return shuffleQuestionOptions(cloned)
 }
 
+/** Shuffle chase round question order for a new chase - returns array of question IDs */
+export function shuffleChaseRoundQuestionIds(): string[] {
+  return shuffleArray(CHASE_ROUND_QUESTIONS.map((q) => q.id))
+}
+
+/** Get first chase round question (index 0 of shuffled ids) */
+export function getFirstChaseRoundQuestion(shuffledQuestionIds: string[]): Question | null {
+  if (shuffledQuestionIds.length === 0) return null
+  const firstId = shuffledQuestionIds[0]
+  const question = CHASE_ROUND_QUESTIONS.find((q) => q.id === firstId)
+  if (!question) return null
+  const cloned = { ...question, options: [...question.options] }
+  return shuffleQuestionOptions(cloned)
+}
+
+/** Get next chase round question from shuffled queue */
+export function getNextChaseRoundQuestion(
+  shuffledQuestionIds: string[],
+  askedQuestionIds: string[]
+): Question | null {
+  const nextIndex = askedQuestionIds.length
+  if (nextIndex >= shuffledQuestionIds.length) return null
+  const nextId = shuffledQuestionIds[nextIndex]
+  const question = CHASE_ROUND_QUESTIONS.find((q) => q.id === nextId)
+  if (!question) return null
+  const cloned = { ...question, options: [...question.options] }
+  return shuffleQuestionOptions(cloned)
+}
+
 export function getChaseRoundQuestion(excludeIds: string[]): Question | null {
   const available = CHASE_ROUND_QUESTIONS.filter((q) => !excludeIds.includes(q.id))
   if (available.length === 0) return null

@@ -12,6 +12,10 @@ export interface SubmitAnswerPayload {
   optionIndex: number
 }
 
+export interface SelectOfferPayload {
+  offerValue: number
+}
+
 // Server -> Client payloads
 export interface RoomCreatedPayload {
   room: import('./room.js').RoomState

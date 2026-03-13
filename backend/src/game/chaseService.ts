@@ -5,7 +5,12 @@ import {
   getFirstCashBuilderQuestion,
   getNextCashBuilderQuestion,
   getEarnedAmount,
+  shuffleChaseRoundQuestionIds,
+  getFirstChaseRoundQuestion,
 } from './questions.js'
+
+const BOARD_SIZE = 7
+const CHASER_START_POSITION = 0
 
 const CASH_BUILDER_DURATION_MS = 60 * 1000
 
@@ -140,5 +145,87 @@ function transitionToOfferSelection(room: Room): void {
     middleOffer,
     higherOffer,
     selectedOffer: null,
+  }
+}
+
+/**
+ * Player position mapping (boardSize=7, chaser at 0, home at 7):
+ * - higherOffer: riskier, start at 2 (further from home)
+ * - middleOffer: bank, start at 3
+ * - lowerOffer: safer, start at 4 (closer to home)
+ */
+const PLAYER_POSITION_BY_OFFER = {
+  higher: 2,
+  middle: 3,
+  lower: 4,
+} as const
+
+export function selectOffer(
+  socketId: string,
+  offerValue: number
+): { success: true; room: Room } | { success: false; error: string } {
+  const room = roomStore.getRoomBySocketId(socketId)
+
+  if (!room) {
+    return { success: false, error: 'You are not in a room' }
+  }
+
+  if (room.phase !== 'offer_selection') {
+    return { success: false, error: 'Not in offer selection phase' }
+  }
+
+  const offer = room.offerSelection
+  if (!offer) {
+    return { success: false, error: 'No offer selection state' }
+  }
+
+  if (offer.selectedOffer !== null) {
+    return { success: false, error: 'Offer already selected' }
+  }
+
+  const player = room.players.find((p) => p.socketId === socketId)
+  if (!player) {
+    return { success: false, error: 'Player not found in room' }
+  }
+
+  if (room.activePlayerId !== player.id) {
+    return { success: false, error: 'Only the active player can select an offer' }
+  }
+
+  const validOffers = [offer.higherOffer, offer.middleOffer, offer.lowerOffer]
+  if (!validOffers.includes(offerValue)) {
+    return { success: false, error: 'Invalid offer value' }
+  }
+
+  offer.selectedOffer = offerValue
+
+  let playerPosition: number
+  if (offerValue === offer.higherOffer) {
+    playerPosition = PLAYER_POSITION_BY_OFFER.higher
+  } else if (offerValue === offer.middleOffer) {
+    playerPosition = PLAYER_POSITION_BY_OFFER.middle
+  } else {
+    playerPosition = PLAYER_POSITION_BY_OFFER.lower
+  }
+
+  startChaseRound(room, offerValue, playerPosition)
+
+  roomStore.setRoom(room)
+  return { success: true, room }
+}
+
+function startChaseRound(room: Room, bankValue: number, playerPosition: number): void {
+  const shuffledQuestionIds = shuffleChaseRoundQuestionIds()
+  const firstQuestion = getFirstChaseRoundQuestion(shuffledQuestionIds)
+
+  room.phase = 'chase_round'
+  room.chaseRound = {
+    boardSize: BOARD_SIZE,
+    playerPosition,
+    chaserPosition: CHASER_START_POSITION,
+    bankValue,
+    currentQuestion: firstQuestion,
+    askedQuestionIds: [],
+    shuffledQuestionIds,
   }
 }

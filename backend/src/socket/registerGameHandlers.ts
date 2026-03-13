@@ -1,10 +1,29 @@
 import type { Server, Socket } from 'socket.io'
-import type { SubmitAnswerPayload } from '../types/socket.js'
+import type { SubmitAnswerPayload, SelectOfferPayload } from '../types/socket.js'
 import * as gameService from '../game/gameService.js'
 import * as roomService from '../game/roomService.js'
 
 export function registerGameHandlers(io: Server): void {
   io.on('connection', (socket: Socket) => {
+    socket.on('select_offer', (payload: SelectOfferPayload) => {
+      const offerValue = payload?.offerValue
+
+      if (typeof offerValue !== 'number') {
+        socket.emit('select_offer_error', { message: 'Invalid offer' })
+        return
+      }
+
+      const result = gameService.selectOffer(socket.id, offerValue)
+
+      if (!result.success) {
+        socket.emit('select_offer_error', { message: result.error })
+        return
+      }
+
+      const roomState = roomService.serializeRoom(result.room)
+      io.to(result.room.code).emit('room_state', { room: roomState })
+    })
+
     socket.on('submit_answer', (payload: SubmitAnswerPayload) => {
       const optionIndex = payload?.optionIndex
 

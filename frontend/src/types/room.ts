@@ -46,7 +46,10 @@ export interface ChaseRoundState {
   boardSize: number
   playerPosition: number
   chaserPosition: number
+  bankValue: number
   currentQuestion: Question | null
+  askedQuestionIds: string[]
+  shuffledQuestionIds: string[]
 }
 
 export interface Room {

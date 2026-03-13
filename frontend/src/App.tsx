@@ -18,9 +18,9 @@ function renderRoomView(room: RoomState, error: string | null, onClearError: () 
     case 'cash_builder':
       return <CashBuilderScreen room={room} error={error} onClearError={onClearError} />
     case 'offer_selection':
-      return <OfferSelectionScreen room={room} />
+      return <OfferSelectionScreen room={room} error={error} onClearError={onClearError} />
     case 'chase_round':
-      return <ChaseRoundScreen />
+      return <ChaseRoundScreen room={room} />
     case 'round_result':
       return <RoundResultScreen />
     case 'finished':
@@ -67,6 +67,10 @@ function App() {
       setError(payload.message)
     }
 
+    const handleSelectOfferError = (payload: { message: string }) => {
+      setError(payload.message)
+    }
+
     socket.on('room_created', handleRoomCreated)
     socket.on('room_joined', handleRoomJoined)
     socket.on('room_state', (payload) => {
@@ -77,6 +81,7 @@ function App() {
     socket.on('join_room_error', handleJoinRoomError)
     socket.on('start_game_error', handleStartGameError)
     socket.on('submit_answer_error', handleSubmitAnswerError)
+    socket.on('select_offer_error', handleSelectOfferError)
 
     return () => {
       socket.off('room_created', handleRoomCreated)
@@ -87,6 +92,7 @@ function App() {
       socket.off('join_room_error', handleJoinRoomError)
       socket.off('start_game_error', handleStartGameError)
       socket.off('submit_answer_error', handleSubmitAnswerError)
+      socket.off('select_offer_error', handleSelectOfferError)
     }
   }, [room?.code])
 
