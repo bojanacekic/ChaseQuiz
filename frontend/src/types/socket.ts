@@ -6,6 +6,7 @@ export interface ClientToServerEvents {
   join_room: (payload: { nickname: string; roomCode: string }) => void
   leave_room: () => void
   get_room_state: () => void
+  start_game: () => void
 }
 
 // Server -> Client events
@@ -16,6 +17,7 @@ export interface ServerToClientEvents {
   left_room: () => void
   create_room_error: (payload: { message: string }) => void
   join_room_error: (payload: { message: string }) => void
+  start_game_error: (payload: { message: string }) => void
   leave_room_error: (payload: { message: string }) => void
   get_room_state_error: (payload: { message: string }) => void
 }

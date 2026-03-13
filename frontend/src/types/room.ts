@@ -7,7 +7,7 @@ export interface Player {
   score: number
 }
 
-export type RoomStatus = 'waiting' | 'in_progress' | 'finished'
+export type RoomStatus = 'lobby' | 'question_round' | 'finished'
 
 export interface Room {
   code: string

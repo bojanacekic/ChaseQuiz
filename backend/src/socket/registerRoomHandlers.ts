@@ -93,6 +93,17 @@ export function registerRoomHandlers(io: Server): void {
       socket.emit('room_state', { room: roomState })
     })
 
+    socket.on('start_game', () => {
+      const result = roomService.startGame(socket.id)
+      if (!result.success) {
+        socket.emit('start_game_error', { message: result.error })
+        return
+      }
+
+      const roomState = roomService.serializeRoom(result.room)
+      io.to(result.room.code).emit('room_state', { room: roomState })
+    })
+
     socket.on('disconnect', () => {
       const room = roomStore.getRoomBySocketId(socket.id)
       if (room) {

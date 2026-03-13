@@ -22,7 +22,7 @@ export function createRoom(nickname: string, socketId: string): Room {
   const room: Room = {
     code,
     players: [player],
-    status: 'waiting',
+    status: 'lobby',
     createdAt: new Date(),
   }
 
@@ -104,4 +104,29 @@ export function serializeRoom(room: Room): RoomState {
     ...room,
     players: room.players.map((p) => ({ ...p })),
   }
+}
+
+export function startGame(socketId: string): { success: true; room: Room } | { success: false; error: string } {
+  const room = roomStore.getRoomBySocketId(socketId)
+
+  if (!room) {
+    return { success: false, error: 'You are not in a room' }
+  }
+
+  if (room.status !== 'lobby') {
+    return { success: false, error: 'Game has already started' }
+  }
+
+  const player = room.players.find((p) => p.socketId === socketId)
+  if (!player?.isHost) {
+    return { success: false, error: 'Only the host can start the game' }
+  }
+
+  if (room.players.length < 2) {
+    return { success: false, error: 'Need at least 2 players to start' }
+  }
+
+  room.status = 'question_round'
+  roomStore.setRoom(room)
+  return { success: true, room }
 }
