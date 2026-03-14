@@ -4,7 +4,9 @@ import * as roomService from './roomService.js'
 import * as chaseDuelLogic from './chaseDuelLogic.js'
 
 const TICK_INTERVAL_MS = 1000
-const REVEAL_DELAY_MS = 2000
+const REVEAL_DELAY_MS = 2500
+/** Delay before showing result screen when chaser catches the player */
+const CAUGHT_RESULT_DELAY_MS = 1800
 
 interface RoomTimers {
   chaserTimeout: ReturnType<typeof setTimeout> | null
@@ -57,10 +59,23 @@ export function resolveImmediately(roomCode: string, io: Server): void {
   clearAll(roomCode)
   const room = roomStore.getRoom(roomCode)
   if (!room || room.phase !== 'chase_round' || !room.chaseRound?.duelState) return
-  const { room: resolvedRoom, loadNext } = chaseDuelLogic.resolveChaseQuestion(room)
+  const result = chaseDuelLogic.resolveChaseQuestion(room)
+  const { room: resolvedRoom, loadNext, outcome } = result
   roomStore.setRoom(resolvedRoom)
   const finalState = roomService.serializeRoom(resolvedRoom)
   io.to(roomCode).emit('room_state', { room: finalState })
+
+  if (outcome === 'caught') {
+    setTimeout(() => {
+      const currentRoom = roomStore.getRoom(roomCode)
+      if (!currentRoom || currentRoom.phase !== 'chase_round') return
+      chaseDuelLogic.transitionToRoundResult(currentRoom, 'caught')
+      roomStore.setRoom(currentRoom)
+      io.to(roomCode).emit('room_state', { room: roomService.serializeRoom(currentRoom) })
+    }, CAUGHT_RESULT_DELAY_MS)
+    return
+  }
+
   if (loadNext) {
     setTimeout(async () => {
       const currentRoom = roomStore.getRoom(roomCode)
@@ -112,12 +127,21 @@ export function startCountdown(roomCode: string, io: Server): void {
     }
     if (r.chaseRound?.duelState && r.chaseRound.duelState.countdownTimeLeft <= 0) {
       clearAll(roomCode)
-      const { room: resolvedRoom, loadNext } = chaseDuelLogic.resolveChaseQuestion(r)
+      const result = chaseDuelLogic.resolveChaseQuestion(r)
+      const { room: resolvedRoom, loadNext, outcome } = result
       roomStore.setRoom(resolvedRoom)
       const finalState = roomService.serializeRoom(resolvedRoom)
       io.to(roomCode).emit('room_state', { room: finalState })
 
-      if (loadNext) {
+      if (outcome === 'caught') {
+        setTimeout(() => {
+          const currentRoom = roomStore.getRoom(roomCode)
+          if (!currentRoom || currentRoom.phase !== 'chase_round') return
+          chaseDuelLogic.transitionToRoundResult(currentRoom, 'caught')
+          roomStore.setRoom(currentRoom)
+          io.to(roomCode).emit('room_state', { room: roomService.serializeRoom(currentRoom) })
+        }, CAUGHT_RESULT_DELAY_MS)
+      } else if (loadNext) {
         setTimeout(async () => {
           const currentRoom = roomStore.getRoom(roomCode)
           if (!currentRoom || currentRoom.phase !== 'chase_round') return

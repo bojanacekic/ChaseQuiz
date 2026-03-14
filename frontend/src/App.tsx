@@ -109,7 +109,7 @@ function App() {
   }, [isAutoStarting])
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-900 to-green-950">
       {room ? (
         renderGameView(room, error, clearError, handleReset, isAutoStarting)
       ) : (

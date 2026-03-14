@@ -150,7 +150,7 @@ export function tickCountdown(roomCode: string): Room | null {
   return room
 }
 
-export function resolveChaseQuestion(room: Room): { room: Room; loadNext: boolean } {
+export function resolveChaseQuestion(room: Room): { room: Room; loadNext: boolean; outcome?: 'caught' } {
   const chase = room.chaseRound!
   const duel = chase.duelState!
 
@@ -173,8 +173,8 @@ export function resolveChaseQuestion(room: Room): { room: Room; loadNext: boolea
   }
 
   if (chase.chaserPosition === chase.playerPosition) {
-    transitionToRoundResult(room, 'caught')
-    return { room, loadNext: false }
+    // Do not transition yet; caller will delay then call transitionToRoundResult(room, 'caught')
+    return { room, loadNext: false, outcome: 'caught' as const }
   }
 
   if (chase.playerPosition >= chase.boardSize) {
@@ -189,7 +189,7 @@ export async function loadNextChaseQuestionAndInitDuel(room: Room): Promise<void
   await loadNextChaseQuestion(room)
 }
 
-function transitionToRoundResult(room: Room, outcome: 'caught' | 'escaped'): void {
+export function transitionToRoundResult(room: Room, outcome: 'caught' | 'escaped'): void {
   room.phase = 'round_result'
   const bankValue = outcome === 'caught' ? 0 : room.chaseRound!.bankValue
   room.roundResult = {

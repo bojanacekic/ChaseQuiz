@@ -35,7 +35,7 @@ function RoundResultScreen({ room, onPlayAgain }: RoundResultScreenProps) {
           <p className="text-slate-400 text-lg">{nickname}</p>
         )}
 
-        <div className="rounded-xl bg-slate-800 border border-slate-600 p-6">
+        <div className="rounded-lg bg-slate-800 border border-slate-600 p-6">
           <p className="text-sm text-slate-400 mb-2">Winnings</p>
           <p className="text-3xl font-bold text-amber-400">
             {formatEuro(result.bankValue)}
