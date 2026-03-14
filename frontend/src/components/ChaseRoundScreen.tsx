@@ -126,42 +126,47 @@ function ChaseRoundScreen({ room, error, onClearError }: ChaseRoundScreenProps) 
                 })}
               </div>
 
-              {/* Countdown and duel status BELOW answers */}
+              {/* Countdown and duel status BELOW answers – fixed height, no scrollbar */}
               {duel && (
-                <div className="mt-2 pt-4 border-t border-slate-600 space-y-1 text-sm">
-                  {duel.countdownStarted && duel.countdownTimeLeft > 0 && (
-                    <p className="text-amber-400 font-medium">
-                      Time left to respond: {duel.countdownTimeLeft}
-                    </p>
-                  )}
-                  {duel.playerAnswered && (
-                    <p className="text-sky-400">Player answered</p>
-                  )}
-                  {duel.chaserAnswered && (
-                    <p className="text-red-400">Chaser answered</p>
-                  )}
-                  {duel.countdownStarted && duel.countdownStartedBy && (
-                    <p className="text-slate-300">
-                      Countdown started by {duel.countdownStartedBy}
-                    </p>
-                  )}
-                  {duel.resolved && (
-                    <div className="space-y-1 pt-2">
-                      {duel.playerMoved && (
-                        <p className="text-emerald-400">
-                          Player correct – moves to {chase.playerPosition}
-                        </p>
-                      )}
-                      {!duel.playerMoved && duel.playerAnswered && (
-                        <p className="text-slate-400">Player incorrect</p>
-                      )}
-                      {duel.chaserMoved && (
-                        <p className="text-red-400">
-                          Chaser correct – moves to {chase.chaserPosition}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                <div
+                  className="mt-2 pt-4 pb-4 border-t border-slate-600 h-[12rem] flex flex-col justify-start text-sm"
+                  aria-live="polite"
+                >
+                  <div className="space-y-1.5">
+                    {duel.countdownStarted && duel.countdownTimeLeft > 0 && (
+                      <p className="text-amber-400 font-medium">
+                        Time left to respond: {duel.countdownTimeLeft}
+                      </p>
+                    )}
+                    {duel.playerAnswered && (
+                      <p className="text-sky-400">Player answered</p>
+                    )}
+                    {duel.chaserAnswered && (
+                      <p className="text-red-400">Chaser answered</p>
+                    )}
+                    {duel.countdownStarted && duel.countdownStartedBy && (
+                      <p className="text-slate-300">
+                        Countdown started by {duel.countdownStartedBy}
+                      </p>
+                    )}
+                    {duel.resolved && (
+                      <div className="space-y-1 pt-2">
+                        {duel.playerMoved && (
+                          <p className="text-emerald-400">
+                            Player correct – moves to {chase.playerPosition}
+                          </p>
+                        )}
+                        {!duel.playerMoved && duel.playerAnswered && (
+                          <p className="text-slate-400">Player incorrect</p>
+                        )}
+                        {duel.chaserMoved && (
+                          <p className="text-red-400">
+                            Chaser correct – moves to {chase.chaserPosition}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
