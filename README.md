@@ -199,6 +199,27 @@ This starts both backend and frontend together (requires `concurrently` to be se
 
 ---
 
+## Running with Docker
+
+The whole app (frontend, backend, and MongoDB) can be run with Docker Compose.
+
+From the **project root**:
+
+```bash
+docker compose up --build
+```
+
+Then open in your browser:
+
+- **Frontend:** http://localhost:5173  
+- **Backend (API / Socket.IO):** http://localhost:5000  
+
+MongoDB runs in a container and data is stored in a Docker volume so it persists between restarts.
+
+**LAN access:** You can open the app from another device on the same network (e.g. `http://<host-ip>:5173`). The frontend connects to the backend using the same hostname, so the game works without code changes. Optionally you can set `VITE_SOCKET_URL` or `VITE_API_URL` in the frontend build to override the backend URL (e.g. `VITE_SOCKET_URL=http://192.168.0.14:5000`).
+
+---
+
 ## Game Flow
 
 1. **Start screen** – Enter your nickname and click **Start Game**
