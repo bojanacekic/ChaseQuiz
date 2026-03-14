@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 import type { Question } from '../types/game.js'
 import { Question as QuestionModel } from '../models/Question.js'
 
-/** Fisher-Yates shuffle indices */
+/** Fisher-Yates shuffle - returns a new shuffled copy */
 function shuffleArray<T>(array: T[]): T[] {
   const result = [...array]
   for (let i = result.length - 1; i > 0; i--) {
@@ -12,41 +12,70 @@ function shuffleArray<T>(array: T[]): T[] {
   return result
 }
 
-/** Shuffle options and update correctAnswer index (expects 3 options) */
-function shuffleQuestionOptions(question: Question): Question {
-  const indices = [0, 1, 2].slice(0, question.options.length)
-  const shuffledIndices = shuffleArray(indices)
-  const correctOriginalIndex = question.correctAnswer
-  const newCorrectIndex = shuffledIndices.indexOf(correctOriginalIndex)
-  return {
-    ...question,
-    options: shuffledIndices.map((i) => question.options[i]),
-    correctAnswer: newCorrectIndex,
-  }
-}
-
-/**
- * Convert a MongoDB document to the game Question format.
- * DB stores correctAnswer as text; game expects correctAnswer as option index.
- */
-function docToQuestion(doc: {
+type QuestionDoc = {
   _id: { toString: () => string }
   text: string
   options: string[]
   correctAnswer: string
   category: string
   difficulty: string
-}): Question {
-  const correctIndex = doc.options.indexOf(doc.correctAnswer)
-  const q: Question = {
+}
+
+/**
+ * Build a game Question with exactly 3 options, always including the correct answer.
+ * Validates the raw doc; returns null if data is invalid (logs warning, does not throw).
+ * - Correct answer is always included.
+ * - Two wrong options are chosen from the remaining options (no duplicates in result).
+ * - Final 3 options are shuffled before being returned.
+ */
+export function buildThreeOptionQuestion(doc: QuestionDoc | null): Question | null {
+  if (!doc || !doc.options || !Array.isArray(doc.options)) {
+    console.warn('[buildThreeOptionQuestion] Invalid question: missing or invalid options')
+    return null
+  }
+  const correct = doc.correctAnswer
+  if (correct == null || typeof correct !== 'string' || correct === '') {
+    console.warn('[buildThreeOptionQuestion] Invalid question: missing correctAnswer', doc._id?.toString())
+    return null
+  }
+  const allOptions = doc.options
+  if (!allOptions.includes(correct)) {
+    console.warn(
+      '[buildThreeOptionQuestion] correctAnswer not in options – question skipped',
+      { questionId: doc._id?.toString(), correctAnswer: correct, options: allOptions }
+    )
+    return null
+  }
+  const wrongOptions = [...new Set(allOptions.filter((o) => o !== correct))]
+  if (wrongOptions.length < 2) {
+    console.warn(
+      '[buildThreeOptionQuestion] Need at least 2 distinct wrong options – question skipped',
+      { questionId: doc._id?.toString(), optionsCount: allOptions.length }
+    )
+    return null
+  }
+  const pickedWrong =
+    wrongOptions.length === 2
+      ? wrongOptions
+      : shuffleArray([...wrongOptions]).slice(0, 2)
+  const finalOptions = shuffleArray([correct, ...pickedWrong])
+  const correctIndex = finalOptions.indexOf(correct)
+  return {
     id: doc._id.toString(),
     text: doc.text,
-    options: doc.options,
-    correctAnswer: correctIndex >= 0 ? correctIndex : 0,
+    options: finalOptions,
+    correctAnswer: correctIndex,
     category: doc.category,
     difficulty: doc.difficulty,
   }
-  return shuffleQuestionOptions(q)
+}
+
+/**
+ * Convert a MongoDB document to the game Question format with exactly 3 options.
+ * Uses buildThreeOptionQuestion so the correct answer is always included.
+ */
+function docToQuestion(doc: QuestionDoc): Question | null {
+  return buildThreeOptionQuestion(doc)
 }
 
 /**
@@ -76,7 +105,9 @@ export async function getRandomCashBuilderQuestion(
       console.warn('No cash builder question returned from MongoDB')
       return null
     }
-    return docToQuestion(docs[0])
+    const question = docToQuestion(docs[0])
+    if (!question) return null
+    return question
   } catch (err) {
     console.warn('getRandomCashBuilderQuestion failed:', err)
     return null
@@ -110,7 +141,9 @@ export async function getRandomChaseQuestion(
       console.warn('No chase question returned from MongoDB')
       return null
     }
-    return docToQuestion(docs[0])
+    const question = docToQuestion(docs[0])
+    if (!question) return null
+    return question
   } catch (err) {
     console.warn('getRandomChaseQuestion failed:', err)
     return null
