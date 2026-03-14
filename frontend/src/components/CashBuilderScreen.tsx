@@ -84,15 +84,19 @@ function CashBuilderScreen({ room, error, onClearError }: CashBuilderScreenProps
               <div className="space-y-3">
                 {error && <p className="text-red-400 text-sm">{error}</p>}
                 <div className="grid gap-3">
-                  {question.options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSubmitAnswer(index)}
-                      className="w-full py-3 px-4 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white text-left transition-colors"
-                    >
-                      {option}
-                    </button>
-                  ))}
+                  {question.options.map((option, index) => {
+                    const label = ['A', 'B', 'C'][index] ?? String(index + 1)
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => handleSubmitAnswer(index)}
+                        className="w-full py-3 px-4 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white text-left transition-colors"
+                      >
+                        <span className="font-mono text-amber-400 mr-2">[{label}]</span>
+                        {option}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             ) : cb.timeLeft <= 0 ? (

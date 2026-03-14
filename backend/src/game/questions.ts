@@ -18,9 +18,9 @@ export function shuffleCashBuilderQuestionIds(): string[] {
   return []
 }
 
-/** Shuffle question options and update correctAnswer index. Returns a new question. */
+/** Shuffle question options and update correctAnswer index (expects 3 options). Returns a new question. */
 export function shuffleQuestionOptions(question: Question): Question {
-  const indices = [0, 1, 2, 3].slice(0, question.options.length)
+  const indices = [0, 1, 2].slice(0, question.options.length)
   const shuffledIndices = shuffleArray(indices)
   const correctOriginalIndex = question.correctAnswer
   const newCorrectIndex = shuffledIndices.indexOf(correctOriginalIndex)

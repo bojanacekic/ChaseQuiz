@@ -99,16 +99,20 @@ function ChaseRoundScreen({ room, error, onClearError }: ChaseRoundScreenProps) 
             <p className="text-white text-lg mb-4">{question.text}</p>
             {error && <p className="text-red-400 text-sm mb-2">{error}</p>}
             <div className="grid gap-2">
-              {question.options.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSubmitAnswer(index)}
-                  disabled={!canAnswer}
-                  className="w-full py-3 px-4 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-600 text-white text-left transition-colors"
-                >
-                  {option}
-                </button>
-              ))}
+              {question.options.map((option, index) => {
+                const label = ['A', 'B', 'C'][index] ?? String(index + 1)
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleSubmitAnswer(index)}
+                    disabled={!canAnswer}
+                    className="w-full py-3 px-4 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-600 text-white text-left transition-colors"
+                  >
+                    <span className="font-mono text-amber-400 mr-2">[{label}]</span>
+                    {option}
+                  </button>
+                )
+              })}
             </div>
           </div>
         ) : (

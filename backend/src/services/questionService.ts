@@ -12,9 +12,9 @@ function shuffleArray<T>(array: T[]): T[] {
   return result
 }
 
-/** Shuffle options and update correctAnswer index */
+/** Shuffle options and update correctAnswer index (expects 3 options) */
 function shuffleQuestionOptions(question: Question): Question {
-  const indices = [0, 1, 2, 3].slice(0, question.options.length)
+  const indices = [0, 1, 2].slice(0, question.options.length)
   const shuffledIndices = shuffleArray(indices)
   const correctOriginalIndex = question.correctAnswer
   const newCorrectIndex = shuffledIndices.indexOf(correctOriginalIndex)
