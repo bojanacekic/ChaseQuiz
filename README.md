@@ -1,6 +1,6 @@
 # ChaseQuiz
 
-ChaseQuiz is a real-time quiz game inspired by the TV show **"The Chase"**. The player first plays a Cash Builder round to earn money, then selects an offer and enters the Chase round where a simulated chaser tries to catch them.
+ChaseQuiz is a real-time quiz game inspired by the TV show **"The Chase"**. The current version is **single-player**: you compete against a **simulated chaser** controlled by the backend. The player first plays a Cash Builder round to earn money, then selects an offer and enters the Chase round where the chaser tries to catch them.
 
 ---
 
@@ -28,7 +28,7 @@ The chosen offer determines your **starting position** on the chase board.
 - **First to answer** starts a **5-second countdown**
 - The other side has **up to 5 seconds** to answer
 - If **both answer before the countdown ends**, the countdown stops immediately and the question is resolved
-- **Correct answers** move your token (or the chaser’s) forward one step on the board
+- **Correct answers** move your token (or the chaser's) forward one step on the board
 
 ### Game Outcomes
 
@@ -62,6 +62,35 @@ The board is shown **vertically**: 0 at the top, 8 (HOME) at the bottom.
 
 ---
 
+## Chaser AI
+
+The chaser is **simulated on the backend**. For each question in the Chase round, the backend determines:
+
+- **Whether the chaser knows the answer** – based on the question’s difficulty (see table below)
+- **How long the chaser takes to respond** – if the chaser knows the answer, a random thinking delay is applied
+
+**Chaser knowledge by difficulty:**
+
+| Difficulty | Chance |
+|-----------|--------|
+| Easy      | 90%    |
+| Medium    | 75%    |
+| Hard      | 60%    |
+
+When the chaser knows the answer, a random response delay between **1.5s and 5.5s** is generated before the chaser’s answer is submitted.
+
+---
+
+## Answer Reveal System
+
+After each question is resolved:
+
+- The **correct answer** is always highlighted in **green**.
+- If the player selected a **wrong answer**, that option is shown in **red** (the correct answer remains green so both are visible).
+- A short **reveal delay** gives the player time to see the result before the next question loads.
+
+---
+
 ## Technology Stack
 
 | Layer    | Technologies                          |
@@ -74,7 +103,7 @@ The board is shown **vertically**: 0 at the top, 8 (HOME) at the bottom.
 
 ## Questions (MongoDB)
 
-Questions are stored in MongoDB in the **`questions`** collection.
+Questions are **stored in MongoDB** and **fetched randomly during gameplay** (Cash Builder and Chase round). They are held in the **`questions`** collection.
 
 Each document includes:
 
@@ -178,17 +207,6 @@ This starts both backend and frontend together (requires `concurrently` to be se
 4. **Chase round** – Answer questions; first to answer starts the 5-second window; correct answers move you or the chaser
 5. **Result screen** – See whether you escaped or were caught and your winnings (0€ if caught)
 6. **Play again** – Use **Play Again** to return to the start and begin a new game
-
----
-
-## UI Notes
-
-- **Chase screen** uses a **two-column layout**:
-  - **Left:** Chase board (positions 0–8, chaser at top, HOME at bottom)
-  - **Right:** Current question, 3 answer buttons, bank value
-- **Countdown** and duel status (e.g. “Player answered”, “Chaser answered”) appear **below the answer buttons**
-- The chase board is large and readable with clear labels for CHASER START and HOME
-- The main gameplay panel is **centered** on the page
 
 ---
 
