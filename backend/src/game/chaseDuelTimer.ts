@@ -83,10 +83,10 @@ export function startCountdown(roomCode: string, io: Server): void {
       io.to(roomCode).emit('room_state', { room: finalState })
 
       if (loadNext) {
-        setTimeout(() => {
+        setTimeout(async () => {
           const currentRoom = roomStore.getRoom(roomCode)
           if (!currentRoom || currentRoom.phase !== 'chase_round') return
-          chaseDuelLogic.loadNextChaseQuestionAndInitDuel(currentRoom)
+          await chaseDuelLogic.loadNextChaseQuestionAndInitDuel(currentRoom)
           roomStore.setRoom(currentRoom)
           const nextState = roomService.serializeRoom(currentRoom)
           io.to(roomCode).emit('room_state', { room: nextState })

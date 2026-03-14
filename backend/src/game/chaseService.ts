@@ -23,10 +23,10 @@ const CASH_BUILDER_DURATION_MS = 60 * 1000
  * - Questions served from shuffled queue until timer expires
  * - Reject answers when timeLeft <= 0 (use endsAt to avoid race conditions)
  */
-export function startCashBuilder(room: Room): Room {
+export async function startCashBuilder(room: Room): Promise<Room> {
   const activePlayer = room.players[0]
   const shuffledQuestionIds = shuffleCashBuilderQuestionIds()
-  const firstQuestion = getFirstCashBuilderQuestion(shuffledQuestionIds)
+  const firstQuestion = await getFirstCashBuilderQuestion(shuffledQuestionIds)
   const now = Date.now()
   const endsAt = now + CASH_BUILDER_DURATION_MS
 
@@ -52,10 +52,10 @@ function isTimeExpired(endsAt: number): boolean {
   return Date.now() >= endsAt
 }
 
-export function submitCashBuilderAnswer(
+export async function submitCashBuilderAnswer(
   socketId: string,
   optionIndex: number
-): { success: true; room: Room } | { success: false; error: string } {
+): Promise<{ success: true; room: Room } | { success: false; error: string }> {
   const room = roomStore.getRoomBySocketId(socketId)
 
   if (!room) {
@@ -100,7 +100,7 @@ export function submitCashBuilderAnswer(
     cb.earnedAmount = getEarnedAmount(cb.correctAnswers)
   }
 
-  const nextQuestion = getNextCashBuilderQuestion(
+  const nextQuestion = await getNextCashBuilderQuestion(
     cb.shuffledQuestionIds,
     cb.askedQuestionIds
   )
@@ -163,10 +163,10 @@ const PLAYER_POSITION_BY_OFFER = {
   lower: 4,
 } as const
 
-export function selectOffer(
+export async function selectOffer(
   socketId: string,
   offerValue: number
-): { success: true; room: Room } | { success: false; error: string } {
+): Promise<{ success: true; room: Room } | { success: false; error: string }> {
   const room = roomStore.getRoomBySocketId(socketId)
 
   if (!room) {
@@ -211,7 +211,7 @@ export function selectOffer(
     playerPosition = PLAYER_POSITION_BY_OFFER.lower
   }
 
-  startChaseRound(room, offerValue, playerPosition)
+  await startChaseRound(room, offerValue, playerPosition)
   roomStore.setRoom(room)
   return { success: true, room }
 }
@@ -275,9 +275,9 @@ export function maybeScheduleChaserAnswer(room: Room, io: Server): void {
   }
 }
 
-function startChaseRound(room: Room, bankValue: number, playerPosition: number): void {
+async function startChaseRound(room: Room, bankValue: number, playerPosition: number): Promise<void> {
   const shuffledQuestionIds = shuffleChaseRoundQuestionIds()
-  const firstQuestion = getFirstChaseRoundQuestion(shuffledQuestionIds)
+  const firstQuestion = await getFirstChaseRoundQuestion(shuffledQuestionIds)
 
   room.phase = 'chase_round'
   room.roundResult = null

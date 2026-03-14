@@ -99,8 +99,8 @@ export function registerRoomHandlers(io: Server): void {
       socket.emit('room_state', { room: roomState })
     })
 
-    socket.on('start_game', () => {
-      const result = roomService.startGame(socket.id)
+    socket.on('start_game', async () => {
+      const result = await roomService.startGame(socket.id)
       if (!result.success) {
         socket.emit('start_game_error', { message: result.error })
         return

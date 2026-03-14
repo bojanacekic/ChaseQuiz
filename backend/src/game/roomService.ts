@@ -140,7 +140,7 @@ export function serializeRoom(room: Room): RoomState {
   }
 }
 
-export function startGame(socketId: string): { success: true; room: Room } | { success: false; error: string } {
+export async function startGame(socketId: string): Promise<{ success: true; room: Room } | { success: false; error: string }> {
   const room = roomStore.getRoomBySocketId(socketId)
 
   if (!room) {
@@ -160,7 +160,7 @@ export function startGame(socketId: string): { success: true; room: Room } | { s
     return { success: false, error: 'Need at least 1 player to start' }
   }
 
-  chaseService.startCashBuilder(room)
+  await chaseService.startCashBuilder(room)
   roomStore.setRoom(room)
   return { success: true, room }
 }

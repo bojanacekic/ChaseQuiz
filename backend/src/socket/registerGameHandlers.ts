@@ -7,7 +7,7 @@ import * as chaseDuelTimer from '../game/chaseDuelTimer.js'
 
 export function registerGameHandlers(io: Server): void {
   io.on('connection', (socket: Socket) => {
-    socket.on('select_offer', (payload: SelectOfferPayload) => {
+    socket.on('select_offer', async (payload: SelectOfferPayload) => {
       const offerValue = payload?.offerValue
 
       if (typeof offerValue !== 'number') {
@@ -15,7 +15,7 @@ export function registerGameHandlers(io: Server): void {
         return
       }
 
-      const result = gameService.selectOffer(socket.id, offerValue)
+      const result = await gameService.selectOffer(socket.id, offerValue)
 
       if (!result.success) {
         socket.emit('select_offer_error', { message: result.error })
@@ -53,7 +53,7 @@ export function registerGameHandlers(io: Server): void {
       io.to(room.code).emit('room_state', { room: roomState })
     })
 
-    socket.on('submit_answer', (payload: SubmitAnswerPayload) => {
+    socket.on('submit_answer', async (payload: SubmitAnswerPayload) => {
       const optionIndex = payload?.optionIndex
 
       if (typeof optionIndex !== 'number') {
@@ -61,7 +61,7 @@ export function registerGameHandlers(io: Server): void {
         return
       }
 
-      const result = gameService.submitAnswer(socket.id, optionIndex)
+      const result = await gameService.submitAnswer(socket.id, optionIndex)
 
       if (!result.success) {
         socket.emit('submit_answer_error', { message: result.error })

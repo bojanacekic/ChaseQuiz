@@ -179,8 +179,8 @@ export function resolveChaseQuestion(room: Room): { room: Room; loadNext: boolea
   return { room, loadNext: true }
 }
 
-export function loadNextChaseQuestionAndInitDuel(room: Room): void {
-  loadNextChaseQuestion(room)
+export async function loadNextChaseQuestionAndInitDuel(room: Room): Promise<void> {
+  await loadNextChaseQuestion(room)
 }
 
 function transitionToRoundResult(room: Room, outcome: 'caught' | 'escaped'): void {
@@ -191,11 +191,11 @@ function transitionToRoundResult(room: Room, outcome: 'caught' | 'escaped'): voi
   }
 }
 
-function loadNextChaseQuestion(room: Room): void {
+async function loadNextChaseQuestion(room: Room): Promise<void> {
   const chase = room.chaseRound!
   const duel = chase.duelState!
   chase.askedQuestionIds.push(duel.questionId)
-  const nextQuestion = getNextChaseRoundQuestion(chase.shuffledQuestionIds, chase.askedQuestionIds)
+  const nextQuestion = await getNextChaseRoundQuestion(chase.shuffledQuestionIds, chase.askedQuestionIds)
 
   if (!nextQuestion) {
     transitionToRoundResult(room, 'escaped')
