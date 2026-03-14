@@ -127,6 +127,14 @@ docker compose up --build
 
 MongoDB data is stored in a Docker volume so it persists between restarts.
 
+**Seeding questions (required for new DB):** If the database is empty, the game will show "No cash builder question returned". Seed sample questions with:
+
+```bash
+docker compose run --rm backend npm run seed
+```
+
+Then start or restart the app: `docker compose up --build`.
+
 ---
 
 ## Running on the Same Local Network

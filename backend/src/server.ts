@@ -6,6 +6,7 @@ import { createServer } from 'http'
 import { Server } from 'socket.io'
 import cors from 'cors'
 import { connectDB } from './config/db.js'
+import { ensureQuestionsSeeded } from './services/seedService.js'
 import { registerRoomHandlers } from './socket/registerRoomHandlers.js'
 import { registerGameHandlers } from './socket/registerGameHandlers.js'
 
@@ -57,6 +58,8 @@ const PORT = 5000
 
 async function start(): Promise<void> {
   await connectDB()
+  await ensureQuestionsSeeded()
+
   httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`ChaseQuiz server running on http://localhost:${PORT}`)
   })
