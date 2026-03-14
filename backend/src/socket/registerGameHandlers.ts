@@ -3,6 +3,7 @@ import type { SubmitAnswerPayload, SelectOfferPayload, SubmitChaseAnswerPayload 
 import * as gameService from '../game/gameService.js'
 import * as roomService from '../game/roomService.js'
 import * as chaseService from '../game/chaseService.js'
+import * as chaseDuelLogic from '../game/chaseDuelLogic.js'
 import * as chaseDuelTimer from '../game/chaseDuelTimer.js'
 
 export function registerGameHandlers(io: Server): void {
@@ -44,13 +45,16 @@ export function registerGameHandlers(io: Server): void {
       }
 
       const room = result.room
-      const duel = room.chaseRound?.duelState
-      if (duel?.countdownStarted && !duel.resolved) {
-        chaseDuelTimer.startCountdown(room.code, io)
+      if (chaseDuelLogic.bothSidesAnswered(room)) {
+        chaseDuelTimer.resolveImmediately(room.code, io)
+      } else {
+        const duel = room.chaseRound?.duelState
+        if (duel?.countdownStarted && !duel.resolved) {
+          chaseDuelTimer.startCountdown(room.code, io)
+        }
+        const roomState = roomService.serializeRoom(room)
+        io.to(room.code).emit('room_state', { room: roomState })
       }
-
-      const roomState = roomService.serializeRoom(room)
-      io.to(room.code).emit('room_state', { room: roomState })
     })
 
     socket.on('submit_answer', async (payload: SubmitAnswerPayload) => {

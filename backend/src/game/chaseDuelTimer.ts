@@ -43,11 +43,41 @@ export function scheduleChaserAnswer(roomCode: string, delayMs: number, io: Serv
       roomStore.setRoom(room)
       const state = roomService.serializeRoom(room)
       io.to(roomCode).emit('room_state', { room: state })
-      if (chaseDuelLogic.shouldStartCountdown(room)) {
+      if (chaseDuelLogic.bothSidesAnswered(room)) {
+        resolveImmediately(roomCode, io)
+      } else if (chaseDuelLogic.shouldStartCountdown(room)) {
         startCountdown(roomCode, io)
       }
     }
   }, delayMs)
+}
+
+/** Resolve question immediately (e.g. when both sides have answered), clear timers, broadcast, load next if needed */
+export function resolveImmediately(roomCode: string, io: Server): void {
+  clearAll(roomCode)
+  const room = roomStore.getRoom(roomCode)
+  if (!room || room.phase !== 'chase_round' || !room.chaseRound?.duelState) return
+  const { room: resolvedRoom, loadNext } = chaseDuelLogic.resolveChaseQuestion(room)
+  roomStore.setRoom(resolvedRoom)
+  const finalState = roomService.serializeRoom(resolvedRoom)
+  io.to(roomCode).emit('room_state', { room: finalState })
+  if (loadNext) {
+    setTimeout(async () => {
+      const currentRoom = roomStore.getRoom(roomCode)
+      if (!currentRoom || currentRoom.phase !== 'chase_round') return
+      await chaseDuelLogic.loadNextChaseQuestionAndInitDuel(currentRoom)
+      roomStore.setRoom(currentRoom)
+      const nextState = roomService.serializeRoom(currentRoom)
+      io.to(roomCode).emit('room_state', { room: nextState })
+      if (currentRoom.chaseRound?.duelState?.chaserWillAnswer) {
+        scheduleChaserAnswer(
+          roomCode,
+          currentRoom.chaseRound.duelState.chaserAnswerDelayMs,
+          io
+        )
+      }
+    }, REVEAL_DELAY_MS)
+  }
 }
 
 function clearCountdownOnly(roomCode: string): void {
@@ -75,6 +105,11 @@ export function startCountdown(roomCode: string, io: Server): void {
     const state = roomService.serializeRoom(r)
     io.to(roomCode).emit('room_state', { room: state })
 
+    if (chaseDuelLogic.bothSidesAnswered(r)) {
+      clearAll(roomCode)
+      resolveImmediately(roomCode, io)
+      return
+    }
     if (r.chaseRound?.duelState && r.chaseRound.duelState.countdownTimeLeft <= 0) {
       clearAll(roomCode)
       const { room: resolvedRoom, loadNext } = chaseDuelLogic.resolveChaseQuestion(r)

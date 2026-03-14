@@ -43,62 +43,41 @@ function ChaseRoundScreen({ room, error, onClearError }: ChaseRoundScreenProps) 
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center p-6">
-      <h1 className="text-4xl font-bold text-amber-400 mb-2">The Chase</h1>
-      <p className="text-slate-400 mb-8">Chase round</p>
-
-      <div className="flex flex-col items-center w-full max-w-lg space-y-8">
+    <div className="min-h-screen flex flex-col md:flex-row p-6 gap-8">
+      {/* Left column: chase board */}
+      <div className="flex-shrink-0 flex flex-col items-center md:items-start">
+        <h1 className="text-2xl font-bold text-amber-400 mb-4 md:hidden">
+          The Chase
+        </h1>
         <ChaseBoard
           boardSize={chase.boardSize}
           playerPosition={chase.playerPosition}
           chaserPosition={chase.chaserPosition}
         />
+      </div>
 
-        <div className="w-full rounded-lg bg-slate-800 border border-slate-600 p-4 text-center">
+      {/* Right column: question and answers */}
+      <div className="flex-1 flex flex-col min-w-0 max-w-xl">
+        <h1 className="text-2xl md:text-3xl font-bold text-amber-400 mb-1 hidden md:block">
+          The Chase
+        </h1>
+        <p className="text-slate-400 mb-6 hidden md:block">Chase round</p>
+
+        <div className="rounded-lg bg-slate-800 border border-slate-600 p-4 mb-6">
           <p className="text-sm text-slate-400 mb-1">Bank</p>
           <p className="text-2xl font-bold text-amber-400">
             {formatEuro(chase.bankValue)}
           </p>
         </div>
 
-        {duel && (
-          <div className="w-full rounded-lg bg-slate-800/50 border border-slate-700 p-3 space-y-1 text-sm">
-            {duel.playerAnswered && <p className="text-green-400">Player answered</p>}
-            {duel.chaserAnswered && <p className="text-red-400">Chaser answered</p>}
-            {duel.countdownStarted && duel.countdownStartedBy && (
-              <p className="text-slate-300">
-                Countdown started by {duel.countdownStartedBy}
-              </p>
-            )}
-            {duel.countdownStarted && duel.countdownTimeLeft > 0 && (
-              <p className="text-amber-400 font-medium">
-                Time left to respond: {duel.countdownTimeLeft}
-              </p>
-            )}
-            {duel.resolved && (
-              <div className="space-y-1 pt-1">
-                {duel.playerMoved && (
-                  <p className="text-green-400">Player correct – moves to {chase.playerPosition}</p>
-                )}
-                {!duel.playerMoved && duel.playerAnswered && (
-                  <p className="text-slate-400">Player incorrect</p>
-                )}
-                {duel.chaserMoved && (
-                  <p className="text-red-400">Chaser correct – moves to {chase.chaserPosition}</p>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
         {question ? (
-          <div className="w-full rounded-lg bg-slate-800 border border-slate-600 p-4">
+          <div className="rounded-lg bg-slate-800 border border-slate-600 p-4 flex flex-col">
             <p className="text-xs text-slate-500 mb-1">
               {question.category} • {question.difficulty}
             </p>
             <p className="text-white text-lg mb-4">{question.text}</p>
             {error && <p className="text-red-400 text-sm mb-2">{error}</p>}
-            <div className="grid gap-2">
+            <div className="grid gap-2 mb-4">
               {question.options.map((option, index) => {
                 const label = ['A', 'B', 'C'][index] ?? String(index + 1)
                 return (
@@ -114,10 +93,57 @@ function ChaseRoundScreen({ room, error, onClearError }: ChaseRoundScreenProps) 
                 )
               })}
             </div>
+
+            {/* Countdown and duel status BELOW answers */}
+            {duel && (
+              <div className="mt-2 pt-4 border-t border-slate-600 space-y-1 text-sm">
+                {duel.countdownStarted && duel.countdownTimeLeft > 0 && (
+                  <p className="text-amber-400 font-medium">
+                    Time left to respond: {duel.countdownTimeLeft}
+                  </p>
+                )}
+                {duel.playerAnswered && (
+                  <p className="text-green-400">Player answered</p>
+                )}
+                {duel.chaserAnswered && (
+                  <p className="text-red-400">Chaser answered</p>
+                )}
+                {duel.countdownStarted && duel.countdownStartedBy && (
+                  <p className="text-slate-300">
+                    Countdown started by {duel.countdownStartedBy}
+                  </p>
+                )}
+                {duel.resolved && (
+                  <div className="space-y-1 pt-2">
+                    {duel.playerMoved && (
+                      <p className="text-green-400">
+                        Player correct – moves to {chase.playerPosition}
+                      </p>
+                    )}
+                    {!duel.playerMoved && duel.playerAnswered && (
+                      <p className="text-slate-400">Player incorrect</p>
+                    )}
+                    {duel.chaserMoved && (
+                      <p className="text-red-400">
+                        Chaser correct – moves to {chase.chaserPosition}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ) : (
-          <p className="text-slate-400 text-center">Loading question...</p>
+          <p className="text-slate-400 text-center py-8">
+            Loading question...
+          </p>
         )}
+
+        <div className="mt-6 rounded-lg bg-slate-800/50 border border-slate-700 p-3">
+          <p className="text-sm text-slate-400">
+            Room: <span className="font-mono text-amber-400">{room.code}</span>
+          </p>
+        </div>
       </div>
     </div>
   )

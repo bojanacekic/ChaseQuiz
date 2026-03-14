@@ -124,6 +124,12 @@ export function shouldStartCountdown(room: Room): boolean {
   return duel ? duel.countdownStarted && !duel.resolved : false
 }
 
+/** True when both player and chaser have answered - allows immediate resolution */
+export function bothSidesAnswered(room: Room): boolean {
+  const duel = room.chaseRound?.duelState
+  return !!(duel?.playerAnswered && duel?.chaserAnswered)
+}
+
 export function startCountdown(roomCode: string): Room | null {
   const room = roomStore.getRoom(roomCode)
   const duel = room?.chaseRound?.duelState
