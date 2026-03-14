@@ -43,10 +43,12 @@ function ChaseRoundScreen({ room, error, onClearError }: ChaseRoundScreenProps) 
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row p-6 gap-8">
+    <div className="min-h-screen flex justify-center items-center px-6 py-8">
+      {/* Panel: board + question - centered on page */}
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 max-w-7xl w-full">
       {/* Left column: chase board */}
-      <div className="flex-shrink-0 flex flex-col items-center md:items-start">
-        <h1 className="text-2xl font-bold text-amber-400 mb-4 md:hidden">
+      <div className="flex-shrink-0 flex flex-col items-center lg:items-start lg:w-[320px]">
+        <h1 className="text-2xl font-bold text-amber-400 mb-6 lg:hidden">
           The Chase
         </h1>
         <ChaseBoard
@@ -56,12 +58,12 @@ function ChaseRoundScreen({ room, error, onClearError }: ChaseRoundScreenProps) 
         />
       </div>
 
-      {/* Right column: question and answers */}
+      {/* Right column: question panel */}
       <div className="flex-1 flex flex-col min-w-0 max-w-xl">
-        <h1 className="text-2xl md:text-3xl font-bold text-amber-400 mb-1 hidden md:block">
+        <h1 className="text-2xl lg:text-3xl font-bold text-amber-400 mb-1 hidden lg:block">
           The Chase
         </h1>
-        <p className="text-slate-400 mb-6 hidden md:block">Chase round</p>
+        <p className="text-slate-400 mb-6 hidden lg:block">Chase round</p>
 
         <div className="rounded-lg bg-slate-800 border border-slate-600 p-4 mb-6">
           <p className="text-sm text-slate-400 mb-1">Bank</p>
@@ -71,7 +73,7 @@ function ChaseRoundScreen({ room, error, onClearError }: ChaseRoundScreenProps) 
         </div>
 
         {question ? (
-          <div className="rounded-lg bg-slate-800 border border-slate-600 p-4 flex flex-col">
+          <div className="rounded-lg bg-slate-800 border border-slate-600 p-5 flex flex-col">
             <p className="text-xs text-slate-500 mb-1">
               {question.category} • {question.difficulty}
             </p>
@@ -138,12 +140,7 @@ function ChaseRoundScreen({ room, error, onClearError }: ChaseRoundScreenProps) 
             Loading question...
           </p>
         )}
-
-        <div className="mt-6 rounded-lg bg-slate-800/50 border border-slate-700 p-3">
-          <p className="text-sm text-slate-400">
-            Room: <span className="font-mono text-amber-400">{room.code}</span>
-          </p>
-        </div>
+      </div>
       </div>
     </div>
   )

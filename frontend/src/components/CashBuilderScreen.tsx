@@ -108,12 +108,6 @@ function CashBuilderScreen({ room, error, onClearError }: CashBuilderScreenProps
         ) : (
           <p className="text-slate-400 text-center">Loading next question...</p>
         )}
-
-        <div className="rounded-lg bg-slate-800/50 border border-slate-700 p-3">
-          <p className="text-sm text-slate-400">
-            Room: <span className="font-mono text-amber-400">{room.code}</span>
-          </p>
-        </div>
       </div>
     </div>
   )

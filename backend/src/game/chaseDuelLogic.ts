@@ -191,9 +191,10 @@ export async function loadNextChaseQuestionAndInitDuel(room: Room): Promise<void
 
 function transitionToRoundResult(room: Room, outcome: 'caught' | 'escaped'): void {
   room.phase = 'round_result'
+  const bankValue = outcome === 'caught' ? 0 : room.chaseRound!.bankValue
   room.roundResult = {
     outcome,
-    bankValue: room.chaseRound!.bankValue,
+    bankValue,
   }
 }
 

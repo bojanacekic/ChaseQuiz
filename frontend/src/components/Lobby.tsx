@@ -5,10 +5,20 @@ interface LobbyProps {
   room: RoomState
   error: string | null
   onClearError: () => void
+  onAutoStart?: boolean
 }
 
-function Lobby({ room, error, onClearError }: LobbyProps) {
+function Lobby({ room, error, onClearError, onAutoStart }: LobbyProps) {
   const isHost = room.players.some((p) => p.socketId === socket.id && p.isHost)
+
+  if (onAutoStart) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6">
+        <h1 className="text-3xl font-bold text-amber-400 mb-4">ChaseQuiz</h1>
+        <p className="text-slate-400 animate-pulse">Starting game...</p>
+      </div>
+    )
+  }
 
   const handleLeave = () => {
     socket.emit('leave_room')
